@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		582809CC1D24CBF500BC0C4E /* Download.gif in Resources */ = {isa = PBXBuildFile; fileRef = 582809CB1D24CBF500BC0C4E /* Download.gif */; };
 		588DB1381D23B43700F986D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588DB1371D23B43700F986D8 /* AppDelegate.swift */; };
 		588DB13A1D23B43700F986D8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588DB1391D23B43700F986D8 /* ViewController.swift */; };
 		588DB13D1D23B43700F986D8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 588DB13B1D23B43700F986D8 /* Main.storyboard */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		582809CB1D24CBF500BC0C4E /* Download.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Download.gif; sourceTree = "<group>"; };
 		588DB1341D23B43700F986D8 /* DemoSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		588DB1371D23B43700F986D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		588DB1391D23B43700F986D8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 		588DB1361D23B43700F986D8 /* DemoSwift */ = {
 			isa = PBXGroup;
 			children = (
+				582809CB1D24CBF500BC0C4E /* Download.gif */,
 				588DB1651D23B46900F986D8 /* LCDownload.swift */,
 				588DB1661D23B46900F986D8 /* LCSwiftDownload.swift */,
 				588DB1371D23B43700F986D8 /* AppDelegate.swift */,
@@ -235,6 +238,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				582809CC1D24CBF500BC0C4E /* Download.gif in Resources */,
 				588DB1421D23B43700F986D8 /* LaunchScreen.storyboard in Resources */,
 				588DB13F1D23B43700F986D8 /* Assets.xcassets in Resources */,
 				588DB13D1D23B43700F986D8 /* Main.storyboard in Resources */,
@@ -490,6 +494,7 @@
 				588DB15E1D23B43800F986D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		588DB15F1D23B43800F986D8 /* Build configuration list for PBXNativeTarget "DemoSwiftTests" */ = {
 			isa = XCConfigurationList;
@@ -498,6 +503,7 @@
 				588DB1611D23B43800F986D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		588DB1621D23B43800F986D8 /* Build configuration list for PBXNativeTarget "DemoSwiftUITests" */ = {
 			isa = XCConfigurationList;
@@ -506,6 +512,7 @@
 				588DB1641D23B43800F986D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

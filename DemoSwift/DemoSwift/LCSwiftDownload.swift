@@ -21,7 +21,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         initFileAllLengthPlist()
     }
     
-    private static let sDownload = LCSwiftDownload()
+    private static var sDownload = LCSwiftDownload()
     class var sharedInstance: LCSwiftDownload {
         return sDownload
     }
@@ -32,13 +32,13 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
      
      - parameter url:      url
      - parameter tag:      唯一标识
+     - parameter resume:   是否开始下载
      - parameter progerss: 进度 可以为nil
      - parameter state:    状态 可以为nil
      */
-    func downloadData(url: String, tag: Int, progerss: ((progerssValue: CGFloat) -> Void)?, state: ((state: LCDownloadState) -> Void)?) {
+    func downloadData(url: String, tag: Int, resume: Bool, progerss: ((progerssValue: Float) -> Void)?, state: ((state: LCDownloadState) -> Void)?) {
         
         let fileLength = getFileDataDownloadedLength(tag)
-        print(fileLength)
         let allLength = getAllLength(tag)
         if fileLength > 0 && fileLength == allLength {
             state?(state: .Completed)
@@ -47,13 +47,13 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         }
         let tagStr = String(tag)
         if let download = downloadDic[tagStr] {
-            
             let dataTask = download.dataTask
-            if dataTask?.state == .Running {
+            if resume {
+                dataTask?.resume()
+                download.stateBlock?(state: .Running)
+            }else {
                 dataTask?.suspend()
                 download.stateBlock?(state: .Suspended)
-            }else {
-                dataTask?.resume()
             }
         }else {
             let request = NSMutableURLRequest(URL: NSURL(string: url)!)
@@ -68,11 +68,13 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
             download.progressBlock = progerss
             download.stateBlock = state
             downloadDic[tagStr] = download
-            dataTask.resume()
+            if resume {
+                dataTask.resume()
+            }
         }
         
     }
- 
+    
     
     /**
      获取下载状态
@@ -100,7 +102,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
     
     /**
      开始
-     
+     必须有下载任务，否则无效
      - parameter tag: 唯一标识
      */
     func start(tag: Int) {
@@ -111,7 +113,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
     
     /**
      暂停
-     
+     必须有下载任务，否则无效
      - parameter tag: 唯一标识
      */
     func suspend(tag: Int) {
@@ -123,7 +125,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
     
     /**
      取消
-     
+     必须有下载任务，否则无效
      - parameter tag: 唯一标识
      */
     func cancel(tag: Int) {
@@ -147,19 +149,23 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         return 0
     }
     
+   
     /**
      获取进度
      
-     - parameter tag: 唯一标识
+     - parameter tag:      唯一标识
+     - parameter progress: 会调用多次，传空返回默认进度
+     
+     - returns: 返回进度
      */
-    func progressValue(tag: Int) -> CGFloat {
+    func getProgressValue(tag: Int) -> Float {
         let downloadedLength = getFileDataDownloadedLength(tag)
         let allLength = getAllLength(tag)
         if allLength == 0 {
-            return 0 
+            return 0
         }
-        let progress = CGFloat(downloadedLength) / CGFloat(allLength)
-        return progress
+        let progressScale = Float(downloadedLength) / Float(allLength)
+        return progressScale
     }
     
     /**
@@ -170,12 +176,13 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
     func removeFileDownloadedData(tag: Int) {
         let path = initFileDataCachePath(tag)
         let fileManager = NSFileManager.defaultManager()
-        do {
-            try fileManager.removeItemAtPath(path)
-        }catch {
-            print(error)
+        if fileManager.fileExistsAtPath(path) {
+            do {
+                try fileManager.removeItemAtPath(path)
+            }catch {
+                print(error)
+            }
         }
-        
         removeAllLength(tag)
         
         if let download = downloadDic[String(tag)] {
@@ -312,8 +319,6 @@ private extension LCSwiftDownload {
         
         let response = response as! NSHTTPURLResponse
         let allLength = response.expectedContentLength + getFileDataDownloadedLength(dataTask.taskIdentifier)
-        print("--------------")
-        print(response.expectedContentLength)
         setAllLength(allLength, WithTag: dataTask.taskIdentifier)
         if let download = downloadDic[String(dataTask.taskIdentifier)] {
             let path = initFileDataCachePath(dataTask.taskIdentifier)
@@ -330,12 +335,10 @@ private extension LCSwiftDownload {
     
     // 获取data 会多次调用
     func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {
-        print(NSThread.currentThread())
         if let download = downloadDic[String(dataTask.taskIdentifier)] {
             let downloadedLength = getFileDataDownloadedLength(dataTask.taskIdentifier)
             download.outputStream!.write(UnsafePointer<UInt8>(data.bytes), maxLength: data.length)
-        print(downloadedLength)
-            let progress = CGFloat(downloadedLength) / CGFloat(download.allLength)
+            let progress = Float(downloadedLength) / Float(download.allLength)
             download.stateBlock?(state: .Running)
             download.progressBlock?(progress: progress)
         }
@@ -344,8 +347,8 @@ private extension LCSwiftDownload {
     
     // 下载完成
     func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
-        print("finish")
         if let download = downloadDic[String(task.taskIdentifier)] {
+            let cData = getDownloadedData(task.taskIdentifier)
             download.stateBlock?(state: .Completed)
             download.progressBlock?(progress: 1.0)
             download.outputStream?.close()

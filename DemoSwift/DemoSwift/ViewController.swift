@@ -11,8 +11,9 @@ import UIKit
 class ViewController: UIViewController {
 
     
-    let Tag1 = 1232
-    let Tag2 = 9808
+    let Tag1 = 123
+    let Tag2 = 980
+    let url = "http://baobab.wdjcdn.com/1455782903700jy.mp4"
     
     weak var pv1: UIProgressView!
     weak var pv2: UIProgressView!
@@ -22,10 +23,11 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let button = UIButton()
-        
+        let sd = LCSwiftDownload.sharedInstance
+
         
        
-        let p1 = LCSwiftDownload.sharedInstance.progressValue(Tag1)
+        let p1 = sd.getProgressValue(Tag1)
         let pv1 = UIProgressView()
         let label1 = UILabel()
         label1.text = String(format: "%.2f", p1)
@@ -53,7 +55,7 @@ class ViewController: UIViewController {
         self.view.addSubview(removeButton)
        
         
-        let p2 = LCSwiftDownload.sharedInstance.progressValue(Tag2)
+        let p2 = sd.getProgressValue(Tag2)
         
         let label2 = UILabel()
         label2.text = String(format: "%.2f", p2)
@@ -83,18 +85,20 @@ class ViewController: UIViewController {
         rbutton1.setImage(UIImage(named: "delete"), forState: .Normal)
         self.view.addSubview(rbutton1)
         
+      
+        
     }
     
     func click(button: UIButton) {
-        button.selected = !button.selected
-        LCSwiftDownload.sharedInstance.downloadData("http://baobab.wdjcdn.com/1455782903700jy.mp4", tag: Tag1, progerss: { (progerssValue: CGFloat) in
+    button.selected = !button.selected
+    let sd = LCSwiftDownload.sharedInstance
+        sd.downloadData(url, tag: Tag1, resume: button.selected, progerss: { (progerssValue) in
             self.label1.text = String(format: "%.2f", progerssValue)
-            self.pv1.progress = Float(progerssValue)
+            self.pv1.progress = progerssValue
             }) { (state) in
-                if state == .Running {
-                    button.selected = true
-                }
+                
         }
+    
     }
     
     func remove(button: UIButton) {
@@ -105,10 +109,12 @@ class ViewController: UIViewController {
     
     func click1(button: UIButton) {
         button.selected = !button.selected
-        LCSwiftDownload.sharedInstance.downloadData("http://baobab.wdjcdn.com/1455782903700jy.mp4", tag: Tag2, progerss: { (progerssValue) in
+        let sd = LCSwiftDownload.sharedInstance
+        sd.downloadData(url, tag: Tag2, resume: button.selected, progerss: { (progerssValue) in
             self.label2.text = String(format: "%.2f", progerssValue)
-            self.pv2.progress = Float(progerssValue)
+            self.pv2.progress = progerssValue
             }, state: nil)
+      
     }
     
     func remove1(button: UIButton) {
