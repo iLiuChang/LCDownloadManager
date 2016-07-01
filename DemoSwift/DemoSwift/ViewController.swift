@@ -19,6 +19,8 @@ class ViewController: UIViewController {
     weak var pv2: UIProgressView!
     weak var label1: UILabel!
     weak var label2: UILabel!
+    weak var button1: UIButton!
+    weak var button2: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,6 +48,7 @@ class ViewController: UIViewController {
         button.setImage(UIImage(named: "start"), forState: .Normal)
         button.setImage(UIImage(named: "pauce"), forState: .Selected)
         self.view.addSubview(button)
+        self.button1 = button
         
         let removeButton = UIButton()
         removeButton.frame = CGRectMake(button.frame.maxX, 50, 50, 50)
@@ -77,7 +80,7 @@ class ViewController: UIViewController {
         button1.setImage(UIImage(named: "start"), forState: .Normal)
         button1.setImage(UIImage(named: "pauce"), forState: .Selected)
         self.view.addSubview(button1)
-        
+        self.button2 = button1
         let rbutton1 = UIButton()
         rbutton1.frame = CGRectMake(button1.frame.maxX, 140, 50, 50)
         rbutton1.setTitleColor(UIColor.blackColor(), forState: .Normal)
@@ -104,6 +107,7 @@ class ViewController: UIViewController {
     func remove(button: UIButton) {
         pv1.progress = 0
         label1.text = "0.00"
+        self.button1.selected = false
         LCSwiftDownload.sharedInstance.removeFileDownloadedData(Tag1)
     }
     
@@ -120,6 +124,7 @@ class ViewController: UIViewController {
     func remove1(button: UIButton) {
         pv2.progress = 0
         label2.text = "0.00"
+        self.button2.selected = false 
         LCSwiftDownload.sharedInstance.removeFileDownloadedData(Tag2)
     }
 

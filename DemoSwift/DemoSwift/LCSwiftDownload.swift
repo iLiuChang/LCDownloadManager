@@ -15,11 +15,6 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         return [:]
     }()
  
-  
-    override init() {
-        super.init()
-        initFileAllLengthPlist()
-    }
     
     private static var sDownload = LCSwiftDownload()
     class var sharedInstance: LCSwiftDownload {
@@ -187,6 +182,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         
         if let download = downloadDic[String(tag)] {
             download.dataTask?.cancel()
+            download.stateBlock?(state: .Canceled)
             download.outputStream?.close()
             download.outputStream = nil
             downloadDic.removeValueForKey(String(tag))
@@ -207,6 +203,7 @@ class LCSwiftDownload: NSObject , NSURLSessionDataDelegate {
         for str in downloadDic.keys {
             if let download = downloadDic[str] {
                 download.dataTask?.cancel()
+                download.stateBlock?(state: .Canceled)
                 download.outputStream?.close()
                 download.outputStream = nil
                 downloadDic.removeValueForKey(str)
@@ -296,6 +293,7 @@ private extension LCSwiftDownload {
     
     // 储存总大小
     func setAllLength(length: IntMax, WithTag tag: Int) {
+        initFileAllLengthPlist()
         let key = initFileAllLengthKey(tag)
         let path = getFileAllLengthPath()
         let dic = getFileAllLengthDic()
@@ -348,7 +346,6 @@ private extension LCSwiftDownload {
     // 下载完成
     func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
         if let download = downloadDic[String(task.taskIdentifier)] {
-            let cData = getDownloadedData(task.taskIdentifier)
             download.stateBlock?(state: .Completed)
             download.progressBlock?(progress: 1.0)
             download.outputStream?.close()
