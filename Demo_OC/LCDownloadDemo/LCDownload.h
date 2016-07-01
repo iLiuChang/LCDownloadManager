@@ -12,6 +12,7 @@ typedef enum {
     LCDownloadStateRunning = 0,     /** 下载中 */
     LCDownloadStateSuspended,     /** 下载暂停 */
     LCDownloadStateCompleted,     /** 下载完成 */
+    LCDownloadStateCanceled,     /** 取消下载 */
     LCDownloadStateFailed         /** 下载失败 */
 }LCDownloadState;
 @interface LCDownload : NSObject
