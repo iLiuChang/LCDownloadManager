@@ -18,6 +18,7 @@ typedef enum {
 @interface LCDownload : NSObject
 @property (nonatomic, strong) NSOutputStream *stream;
 @property (nonatomic, copy) NSString *url;
+@property (nonatomic, copy) NSString *fileName;
 @property (nonatomic, assign) long long allLength;
 @property (nonatomic, strong) NSURLSessionDataTask *task;
 @property (nonatomic, copy) void(^progressBlock)( CGFloat progress);

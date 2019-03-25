@@ -7,7 +7,8 @@
 //
 
 #import "LCDownloadManager.h"
-#define AllLengthKey(tag)  [NSString stringWithFormat:@"%lud",tag]
+#import "NSString+Ext.h"
+
 
 @interface LCDownloadManager()<NSURLSessionTaskDelegate>
 
@@ -33,15 +34,16 @@ static LCDownloadManager *_downloadManager;
     return _downloadDic;
 }
 
-- (NSUInteger)allLengthWithTag:(NSUInteger)tag {
-    return [self getAllLength:tag];;
+- (NSUInteger)allLengthWithFileName:(NSString *)fileName {
+    return [self getAllLengthWithFileName:fileName];;
 }
 
 
-- (CGFloat)progressWithTag:(NSUInteger)tag {
-    NSUInteger loadedLength = [self getFileDownloadedLength:tag];
+- (CGFloat)progressWithURL:(NSString *)url {
+    NSString *fileName = url.md5String;
+    NSUInteger loadedLength = [self getFileDownloadedLengthWithFileName:fileName];
 
-    NSUInteger allLength = [self getAllLength:tag];
+    NSUInteger allLength = [self getAllLengthWithFileName:fileName];
     NSLog(@"loaded:%lud  all:%lud",loadedLength,allLength);
     if (allLength == 0) {
         return 0.0;
@@ -49,12 +51,16 @@ static LCDownloadManager *_downloadManager;
     return (double)loadedLength / allLength;
 }
 
-- (void)downloadDataWithURL:(NSString *)url tag:(NSUInteger)tag resume:(BOOL)resume progress: (void(^)( CGFloat progress)) progressBlock state:(void(^)(LCDownloadState state))stateBlack{
+- (void)downloadDataWithURL:(NSString *)url resume:(BOOL)resume progress: (void(^)( CGFloat progress)) progressBlock state:(void(^)(LCDownloadState state))stateBlack{
    
-    if (!url && !tag) {
+    if (!url) {
+        NSLog(@"url is nil");
         return;
     }
-    if ([self getAllLength:tag] == [self getFileDownloadedLength:tag] && [self getFileDownloadedLength:tag] > 0) {
+    
+    NSString *urlmd5 = url.md5String;
+
+    if ([self getAllLengthWithFileName:urlmd5] == [self getFileDownloadedLengthWithFileName:urlmd5] && [self getFileDownloadedLengthWithFileName:urlmd5] > 0) {
         if (stateBlack) {
             stateBlack(LCDownloadStateCompleted);
         }
@@ -63,8 +69,8 @@ static LCDownloadManager *_downloadManager;
         }
         return;
     }
-    if ([self.downloadDic valueForKey:@(tag).stringValue]) {
-     LCDownload *lc_D = [self.downloadDic valueForKey:@(tag).stringValue];
+    if ([self.downloadDic valueForKey:url]) {
+     LCDownload *lc_D = [self.downloadDic valueForKey:url];
         if (resume) {
             [lc_D.task resume];
             
@@ -78,55 +84,51 @@ static LCDownloadManager *_downloadManager;
       
         return;
     }
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:[[NSOperationQueue alloc] init]];
-    
-
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:[NSOperationQueue mainQueue]];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
     // 设置请求头
-    NSString *range = [NSString stringWithFormat:@"bytes=%zd-", [self getFileDownloadedLength:tag]];
+    NSString *range = [NSString stringWithFormat:@"bytes=%zd-", [self getFileDownloadedLengthWithFileName:urlmd5]];
     [request setValue:range forHTTPHeaderField:@"Range"];
-    
     // 创建一个Data任务
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
-
-    [task setValue:@(tag) forKeyPath:@"taskIdentifier"];
     
     LCDownload *lc_download = [[LCDownload alloc]init];
     lc_download.task = task;
     lc_download.progressBlock = progressBlock;
     lc_download.stateBlock = stateBlack;
-    [self.downloadDic setValue:lc_download forKey:@(tag).stringValue];
+    lc_download.fileName = urlmd5;
+    [self.downloadDic setValue:lc_download forKey:url];
     if (resume) {
         [task resume];
     }
 }
 
-- (void)resumeWithTag:(NSUInteger)tag {
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(tag).stringValue];
+- (void)resumeWithURL:(NSString *)url {
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
     if (lc_D) {
         [lc_D.task resume];
     }
 }
 
-- (void)suspendWithTag:(NSUInteger)tag {
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(tag).stringValue];
+- (void)suspendWithURL:(NSString *)url {
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
     if (lc_D) {
         [lc_D.task suspend];
         lc_D.stateBlock(LCDownloadStateSuspended);
     }
 }
 
-- (void)cancelWithTag:(NSUInteger)tag {
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(tag).stringValue];
+- (void)cancelWithURL:(NSString *)url {
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
     if (lc_D) {
         [lc_D.task cancel];
         lc_D.stateBlock(LCDownloadStateCanceled);
     }
 }
 
-- (NSData *)downloadedDataWithTag:(NSUInteger)tag {
-    return [self getFileDownloadedData:tag];
+- (NSData *)downloadedDataWithFileName:(NSString *)fileName {
+    return [self getFileDownloadedDataWithFileName:fileName];
 }
 
 - (void)removeAllFileData {
@@ -137,50 +139,47 @@ static LCDownloadManager *_downloadManager;
         if (lc_D) {
             [lc_D.task suspend];
             lc_D.progressBlock(0.0);
-            [self.downloadDic removeObjectForKey:key];
         }
     }];
-    
+    [self.downloadDic removeAllObjects];
+
 
 }
-- (void)removeFileDataWithTag:(NSUInteger)tag {
-    if (!tag) {
+
+- (void)removeFileDataWithURL:(NSString *)url {
+    if (!url) {
         return;
     }
-    NSString *fullPath = [self createCachePath:tag];
+    
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
+    if (!lc_D) {
+        return;
+    }
+    NSString *fullPath = [self createCachePathWithFileName:lc_D.fileName];
     NSFileManager *fileManager = [NSFileManager defaultManager ];
     if ([fileManager fileExistsAtPath:fullPath]) {
         [fileManager removeItemAtPath:fullPath error:nil];
     }
-    
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(tag).stringValue];
-    if (lc_D) {
-        [lc_D.task cancel];
-        if (lc_D.stateBlock) {
-            lc_D.stateBlock(LCDownloadStateCanceled);
-        }
-        if (lc_D.progressBlock) {
-            lc_D.progressBlock(0.0);
-        }
-        [self.downloadDic removeObjectForKey:@(tag).stringValue];
+
+    [lc_D.task cancel];
+    if (lc_D.stateBlock) {
+        lc_D.stateBlock(LCDownloadStateCanceled);
     }
+    if (lc_D.progressBlock) {
+        lc_D.progressBlock(0.0);
+    }
+    [self.downloadDic removeObjectForKey:url];
 
-    [self removeAllLength:tag];
+    [self removeAllLengthWithFileName:lc_D.fileName];
 
-    
 }
-// 创建文件名
-- (NSString *)createFileName:(NSUInteger)tag {
-    return [NSString stringWithFormat:@"LCDownload%lud",tag];
-}
+
 // 创建缓存路径
-- (NSString *)createCachePath:(NSUInteger)tag {
-    NSString *fileName = [self createFileName:tag];
+- (NSString *)createCachePathWithFileName:(NSString *)fileName {
     NSString *fullPath = [self getCachDirectory];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager createDirectoryAtPath:fullPath withIntermediateDirectories:YES attributes:nil error:NULL];
    NSString *path = [fullPath stringByAppendingPathComponent:fileName];
-    
     return path;
 }
 
@@ -188,27 +187,27 @@ static LCDownloadManager *_downloadManager;
     return [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"LCCache"];
 }
 
-- (void)setAllLength:(NSUInteger)allLength WithTag:(NSUInteger)tag {
+- (void)setAllLength:(NSUInteger)allLength WithFileName:(NSString *)fileName {
     [self createFileAllLengthPlist];
     NSString *path = [self getFileAllLengthPath];
     NSMutableDictionary *dic = [self getFileAllLengthDic];
-    [dic setValue:@(allLength) forKey:AllLengthKey(tag)];
+    [dic setValue:@(allLength) forKey:fileName];
     [dic writeToFile:path atomically:YES];
 }
 
-- (void)removeAllLength:(NSUInteger)tag {
+- (void)removeAllLengthWithFileName:(NSString *)fileName {
     NSString *path = [self getFileAllLengthPath];
     NSMutableDictionary *dic = [self getFileAllLengthDic];
-    if ([dic.allKeys containsObject:AllLengthKey(tag)]) {
-        [dic removeObjectForKey:AllLengthKey(tag)];
+    if ([dic.allKeys containsObject:fileName]) {
+        [dic removeObjectForKey:fileName];
         [dic writeToFile:path atomically:YES];
     }
 
 }
-- (NSUInteger)getAllLength:(NSUInteger)tag {
+- (NSUInteger)getAllLengthWithFileName:(NSString *)fileName {
         NSMutableDictionary *dic = [self getFileAllLengthDic];
-    if ([dic.allKeys containsObject:AllLengthKey(tag)]) {
-        return ((NSNumber *)[dic valueForKey:AllLengthKey(tag)]).unsignedIntegerValue;
+    if ([dic.allKeys containsObject:fileName]) {
+        return ((NSNumber *)[dic valueForKey:fileName]).unsignedIntegerValue;
     }
     return 0;
 }
@@ -234,17 +233,15 @@ static LCDownloadManager *_downloadManager;
     return [[NSMutableDictionary alloc]initWithContentsOfFile:path];
 }
 
-
-
 // 获取本地已经下载的大小
-- (NSUInteger)getFileDownloadedLength:(NSUInteger)tag {
-    NSData *data = [self getFileDownloadedData:tag];
+- (NSUInteger)getFileDownloadedLengthWithFileName:(NSString *)fileName {
+    NSData *data = [self getFileDownloadedDataWithFileName:fileName];
     if (data) return data.length;
     return 0.0;
 }
 
-- (NSData *)getFileDownloadedData:(NSUInteger)tag {
-    NSString *fullPath = [self createCachePath:tag];
+- (NSData *)getFileDownloadedDataWithFileName:(NSString *)fileName {
+    NSString *fullPath = [self createCachePathWithFileName:fileName];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     if ([fileManager fileExistsAtPath:fullPath]) {
         NSData *data = [NSData dataWithContentsOfFile:fullPath];
@@ -254,10 +251,16 @@ static LCDownloadManager *_downloadManager;
 }
 // 收到响应
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSHTTPURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition))completionHandler {
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(dataTask.taskIdentifier).stringValue];
-    NSUInteger allLength = response.expectedContentLength + [self getFileDownloadedLength:dataTask.taskIdentifier];
-    [self setAllLength:allLength WithTag:dataTask.taskIdentifier];
-    NSString *fullPath = [self createCachePath:dataTask.taskIdentifier];
+    NSString *url = dataTask.currentRequest.URL.absoluteString;
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
+    NSInteger allLength = response.expectedContentLength + [self getFileDownloadedLengthWithFileName:lc_D.fileName];
+    NSLog(@"allLength:%d expectedContentLength:%d", allLength, response.expectedContentLength);
+    if (allLength <= 0) {
+        completionHandler(NSURLSessionResponseCancel);
+        return;
+    }
+    [self setAllLength:allLength WithFileName:lc_D.fileName];
+    NSString *fullPath = [self createCachePathWithFileName:lc_D.fileName];
     // 创建流
     NSOutputStream *stream = [NSOutputStream outputStreamToFileAtPath:fullPath append:YES];
     lc_D.stream = stream;
@@ -268,14 +271,14 @@ static LCDownloadManager *_downloadManager;
 }
 // 接受数据（会多次调用）
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
-   
-     LCDownload *lc_D = [self.downloadDic valueForKey:@(dataTask.taskIdentifier).stringValue];
+    NSString *url = dataTask.currentRequest.URL.absoluteString;
+     LCDownload *lc_D = [self.downloadDic valueForKey:url];
     if (lc_D) {
         if (lc_D.stateBlock) {
             lc_D.stateBlock(LCDownloadStateRunning);
         }
         [lc_D.stream write:data.bytes maxLength:data.length];
-        CGFloat scale = (double)[self getFileDownloadedLength:dataTask.taskIdentifier] / lc_D.allLength;
+        CGFloat scale = (double)[self getFileDownloadedLengthWithFileName:lc_D.fileName] / lc_D.allLength;
         if (lc_D.progressBlock) {
             lc_D.progressBlock(scale);
         }
@@ -285,13 +288,14 @@ static LCDownloadManager *_downloadManager;
 
 // 请求完毕或失败
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-    LCDownload *lc_D = [self.downloadDic valueForKey:@(task.taskIdentifier).stringValue];
+    NSString *url = task.currentRequest.URL.absoluteString;
+    LCDownload *lc_D = [self.downloadDic valueForKey:url];
     [lc_D.stream close];
     lc_D.stream = nil;
     if (lc_D.stateBlock) {
         lc_D.stateBlock(LCDownloadStateCompleted);
     }
-    [self.downloadDic removeObjectForKey:@(task.taskIdentifier).stringValue];
+    [self.downloadDic removeObjectForKey:url];
     if (error) {
         if (lc_D.stateBlock) {
             lc_D.stateBlock(LCDownloadStateFailed);

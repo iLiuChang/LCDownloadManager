@@ -17,6 +17,8 @@
 		04EF607C1D1D3E880014CB30 /* LCDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EF607B1D1D3E880014CB30 /* LCDownloadManager.m */; };
 		04EF607F1D1D43BB0014CB30 /* LCDownload.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EF607E1D1D43BB0014CB30 /* LCDownload.m */; };
 		588DB16A1D23B49C00F986D8 /* Download1.gif in Resources */ = {isa = PBXBuildFile; fileRef = 588DB1691D23B49C00F986D8 /* Download1.gif */; };
+		58F159CD224885E900FD8636 /* NSString+Ext.m in Sources */ = {isa = PBXBuildFile; fileRef = 58F159CC224885E900FD8636 /* NSString+Ext.m */; };
+		58F159D02248863C00FD8636 /* NSData+Ext.m in Sources */ = {isa = PBXBuildFile; fileRef = 58F159CF2248863C00FD8636 /* NSData+Ext.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,10 @@
 		04EF607D1D1D43BB0014CB30 /* LCDownload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCDownload.h; sourceTree = "<group>"; };
 		04EF607E1D1D43BB0014CB30 /* LCDownload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LCDownload.m; sourceTree = "<group>"; };
 		588DB1691D23B49C00F986D8 /* Download1.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Download1.gif; sourceTree = "<group>"; };
+		58F159CB224885E900FD8636 /* NSString+Ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Ext.h"; sourceTree = "<group>"; };
+		58F159CC224885E900FD8636 /* NSString+Ext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Ext.m"; sourceTree = "<group>"; };
+		58F159CE2248863C00FD8636 /* NSData+Ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+Ext.h"; sourceTree = "<group>"; };
+		58F159CF2248863C00FD8636 /* NSData+Ext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+Ext.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +95,7 @@
 		04EF60531D1D3E500014CB30 /* LCDownloadDemo */ = {
 			isa = PBXGroup;
 			children = (
+				58F159CA224883C700FD8636 /* Source */,
 				588DB1691D23B49C00F986D8 /* Download1.gif */,
 				04EF60581D1D3E500014CB30 /* AppDelegate.h */,
 				04EF60591D1D3E500014CB30 /* AppDelegate.m */,
@@ -98,10 +105,6 @@
 				04EF60611D1D3E500014CB30 /* Images.xcassets */,
 				04EF60631D1D3E500014CB30 /* LaunchScreen.xib */,
 				04EF60541D1D3E500014CB30 /* Supporting Files */,
-				04EF607A1D1D3E880014CB30 /* LCDownloadManager.h */,
-				04EF607B1D1D3E880014CB30 /* LCDownloadManager.m */,
-				04EF607D1D1D43BB0014CB30 /* LCDownload.h */,
-				04EF607E1D1D43BB0014CB30 /* LCDownload.m */,
 			);
 			path = LCDownloadDemo;
 			sourceTree = "<group>";
@@ -130,6 +133,21 @@
 				04EF606F1D1D3E500014CB30 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		58F159CA224883C700FD8636 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				04EF607A1D1D3E880014CB30 /* LCDownloadManager.h */,
+				04EF607B1D1D3E880014CB30 /* LCDownloadManager.m */,
+				04EF607D1D1D43BB0014CB30 /* LCDownload.h */,
+				04EF607E1D1D43BB0014CB30 /* LCDownload.m */,
+				58F159CB224885E900FD8636 /* NSString+Ext.h */,
+				58F159CC224885E900FD8636 /* NSString+Ext.m */,
+				58F159CE2248863C00FD8636 /* NSData+Ext.h */,
+				58F159CF2248863C00FD8636 /* NSData+Ext.m */,
+			);
+			path = Source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -236,8 +254,10 @@
 				04EF607F1D1D43BB0014CB30 /* LCDownload.m in Sources */,
 				04EF607C1D1D3E880014CB30 /* LCDownloadManager.m in Sources */,
 				04EF605D1D1D3E500014CB30 /* ViewController.m in Sources */,
+				58F159CD224885E900FD8636 /* NSString+Ext.m in Sources */,
 				04EF605A1D1D3E500014CB30 /* AppDelegate.m in Sources */,
 				04EF60571D1D3E500014CB30 /* main.m in Sources */,
+				58F159D02248863C00FD8636 /* NSData+Ext.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

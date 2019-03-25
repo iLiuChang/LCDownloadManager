@@ -20,19 +20,17 @@
  *  添加下载任务
  *
  *  @param url           url
- *  @param tag           唯一标识
  *  @param resume        是否下载
  *  @param progressBlock 下载进度回调
  *  @param stateBlack    下载状态回调
  */
-- (void)downloadDataWithURL:(NSString *)url tag:(NSUInteger)tag resume:(BOOL)resume progress: (void(^)( CGFloat progress)) progressBlock state:(void(^)(LCDownloadState state))stateBlack;
+- (void)downloadDataWithURL:(NSString *)url resume:(BOOL)resume progress: (void(^)( CGFloat progress)) progressBlock state:(void(^)(LCDownloadState state))stateBlack;
 
 /**
  *  删除本地数据
  *
- *  @param tag 唯一标识
  */
-- (void)removeFileDataWithTag:(NSUInteger)tag;
+- (void)removeFileDataWithURL:(NSString *)url;
 
 /**
  *  清空
@@ -44,40 +42,37 @@
  *
  *  @param tag 唯一标识
  */
-- (NSUInteger)allLengthWithTag:(NSUInteger)tag;
+//- (NSUInteger)allLengthWithTag:(NSUInteger)tag;
 
 /**
  *  进度
  *
  *  @param tag 唯一标识
  */
-- (CGFloat)progressWithTag:(NSUInteger)tag;
+- (CGFloat)progressWithURL:(NSString *)url;
 
 /**
  *  开始
  *
- *  @param tag 唯一标识
  */
-- (void)resumeWithTag:(NSUInteger)tag;
+- (void)resumeWithURL:(NSString *)url;
 
 /**
  *  暂停
  *
- *  @param tag 唯一标识
  */
-- (void)suspendWithTag:(NSUInteger)tag;
+- (void)suspendWithURL:(NSString *)url;
 
 /**
  *  取消
  *
- *  @param tag 唯一标识
  */
-- (void)cancelWithTag:(NSUInteger)tag;
+- (void)cancelWithURL:(NSString *)url;
 
 /**
  *  已经下载的本地数据
  *
  *  @param tag 唯一标识
  */
-- (NSData *)downloadedDataWithTag:(NSUInteger)tag;
+//- (NSData *)downloadedDataWithURL:(NSString *)url;
 @end
