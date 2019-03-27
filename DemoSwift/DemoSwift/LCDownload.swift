@@ -16,9 +16,9 @@ enum LCDownloadState {
 }
 class  LCDownload: NSObject {
 
-    var dataTask: NSURLSessionDataTask?
-    var outputStream: NSOutputStream?
+    var dataTask: URLSessionDataTask?
+    var outputStream: OutputStream?
     var allLength: Int = 0
-    var progressBlock: ((progress: Float) -> Void)?
-    var stateBlock: ((state: LCDownloadState) -> Void)?
+    var progressBlock: ((Float) -> Void)?
+    var stateBlock: ((LCDownloadState) -> Void)?
 }
