@@ -11,9 +11,9 @@ import UIKit
 class ViewController: UIViewController {
 
     
-    let Tag1 = 1233
+    let Tag1 = 12334
     let Tag2 = 980
-    let url = "https://www.easyicon.net/download/png/1202495/1253/"
+    let url = "http://118.31.132.13:8002/images/f/f3/CCP_REST_DEMO_Objective-C_v2.6r.zip"
     
     weak var pv1: UIProgressView!
     weak var pv2: UIProgressView!

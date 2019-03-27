@@ -53,7 +53,6 @@ class LCSwiftDownload: NSObject , URLSessionDataDelegate {
         }else {
             var request = URLRequest(url: URL(string: url)!)
             
-//            let request = NSMutableURLRequest(URL: URL(string: url)!)
             let session = initSession()
 
             request.setValue("bytes=\(fileLength)-", forHTTPHeaderField: "Range")
@@ -348,7 +347,6 @@ private extension LCSwiftDownload {
             
             //Your stream
             download.outputStream?.write(dataPointer, maxLength: data.count)
-            //            download.outputStream!.write(UnsafePointer<UInt8>(data.bytes), maxLength: data.length)
             let progress = Float(downloadedLength) / Float(download.allLength)
             download.stateBlock?(.Running)
             download.progressBlock?(progress)
